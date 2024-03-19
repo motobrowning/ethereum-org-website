@@ -1,27 +1,29 @@
+import { Dispatch, SetStateAction, useState } from "react"
 import { Icon } from "@chakra-ui/react"
-import { useState } from "react"
-import { WalletTableProps } from "."
-import { trackCustomEvent } from "../../../utils/matomo"
+
+import { WalletTableProps } from "@/components/FindWallet/WalletTable"
 import {
-  OpenSourceWalletIcon,
-  NonCustodialIcon,
-  HardwareSupportIcon,
-  WalletConnectIcon,
-  RPCImportingIcon,
-  NFTSupportIcon,
+  BuyCryptoIcon,
   ConnectDappsIcon,
-  StakingIcon,
-  SwapIcon,
-  Layer2Icon,
-  GasFeeCustomizationIcon,
+  EIP1559Icon,
   ENSSupportIcon,
   ERC20SupportIcon,
-  EIP1559Icon,
-  BuyCryptoIcon,
-  WithdrawCryptoIcon,
+  GasFeeCustomizationIcon,
+  HardwareSupportIcon,
+  Layer2Icon,
   MultisigIcon,
+  NFTSupportIcon,
+  NonCustodialIcon,
+  OpenSourceWalletIcon,
+  RPCImportingIcon,
   SocialRecoverIcon,
-} from "../../icons/wallets"
+  StakingIcon,
+  SwapIcon,
+  WalletConnectIcon,
+  WithdrawCryptoIcon,
+} from "@/components/icons/wallets"
+
+import { trackCustomEvent } from "@/lib/utils/matomo"
 
 export interface DropdownOption {
   label: string
@@ -36,6 +38,8 @@ export type ColumnClassName = "firstCol" | "secondCol" | "thirdCol"
 type UseWalletTableProps = Pick<WalletTableProps, "filters" | "walletData"> & {
   t: (x: string) => string
 }
+
+export type SetFeatureSelectState = Dispatch<SetStateAction<DropdownOption>>
 
 export const useWalletTable = ({
   filters,
@@ -173,7 +177,7 @@ export const useWalletTable = ({
 
   const [walletCardData, setWalletData] = useState(
     walletData.map((wallet) => {
-      return { ...wallet, moreInfo: false, key: wallet.image_name }
+      return { ...wallet, moreInfo: false, key: wallet.name }
     })
   )
   const [firstFeatureSelect, setFirstFeatureSelect] = useState(
@@ -189,12 +193,11 @@ export const useWalletTable = ({
   const updateMoreInfo = (key) => {
     const temp = [...walletCardData]
 
-    for (const [idx, wallet] of temp.entries()) {
+    temp.forEach((wallet, idx) => {
       if (wallet.key === key) {
         temp[idx].moreInfo = !temp[idx].moreInfo
-        break
       }
-    }
+    })
 
     setWalletData(temp)
   }
@@ -302,14 +305,16 @@ export const useWalletTable = ({
   ) => {
     const domItems: HTMLCollectionOf<Element> =
       document.getElementsByClassName(className)
-    for (let item of domItems) {
+
+    Array.from(domItems).forEach((item) => {
       item.classList.add("fade")
-    }
+    })
+
     setTimeout(() => {
       stateUpdateMethod(selectedOption)
-      for (let item of domItems) {
+      Array.from(domItems).forEach((item) => {
         item.classList.remove("fade")
-      }
+      })
     }, 375)
 
     trackCustomEvent({
